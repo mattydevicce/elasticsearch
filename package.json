@@ -1,0 +1,17 @@
+{
+  "name": "elastisearch",
+  "version": "1.0.0",
+  "description": "This project was built as a tribute to the greatest API in the world. It uses elastisearch.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Matt Morrisey",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.6.1",
+    "elasticsearch": "^15.1.1",
+    "pg": "^6.1.0",
+    "request": "^2.88.0"
+  }
+}

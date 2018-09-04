@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tribute API</title>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
+</head>
+
+
+<body>
+	<nav>
+		<div class="nav-wrapper">
+			<a href="#" class="brand-logo">Logo</a>
+			<div id="user" class="right hide-on-med-and-down" style="margin-right: 2%;">
+			</div>
+		</div>
+	</nav>
+	<div class="container" style="width: 500px">
+		<h3>Welcome Foo!</h3>
+		<h4 id="errors" style="text-align: center"></h4>
+		<input id="search-param" type="text">
+		<a id="search" class="waves-effect waves-light btn">search</a>
+		<br>
+		<div class="indicies">
+			<h4>Indicies
+			<ul class="indicies-ul collection">
+			</ul>
+		</div>
+		<div id="results">
+			<h4>Results</h4>
+		</div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript">
+	$(document).ready(function(){	
+
+		// function for "loggin in"
+		$.ajax({
+			url: 'http://localhost:3000/users/foo',
+			type: 'GET',
+			data: {
+				format: 'json'
+			},
+			success: function(response) {
+				response.forEach(function(e) {
+					$('.indicies-ul').append('<li class="collection-item">' + e.index + '</li>');
+				});
+			}, 
+			error: function() {
+				$('#errors').html("There was an error processing your request. Please try again.");
+			}
+		});
+
+		$("#search").on('click', function(e) {
+			$('#results').html('');
+			$("#errors").remove();
+			$.ajax({
+				url: 'http://localhost:3000/search/foo',
+				type: 'GET',
+				data: {
+					format: 'json',
+					searchParam: $("#search-param").val()
+				},
+				success: function(response) {
+					if (response.length > 0) {
+						$("#results").append("<ul class='collection results-ul'></ul>");
+						response.forEach(e => {
+							$('.results-ul').append('<li class="collection-item">' + e.full_name + '<br>' + e.location + '</li>');
+						});
+					} else {
+						$("#results").append('<h4>No data found!</h4>');
+					};
+				},
+				error: function() {
+					$('#errors').html("There was an error processing your request. Please try again.");
+				}
+			});			
+		});
+	});
+	</script>
+
+</body>
+</html>
