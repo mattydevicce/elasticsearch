@@ -1,29 +1,59 @@
 const express = require('express');
-const request = require('request');
-const pg = require('pg');
+const Sequelize = require('sequelize');
 const async = require('async');
 const elasticsearch = require('elasticsearch');
-const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/signafiretht';
-
+const config = require('./config/config.json');
+const db = require('./db');
+const models = db.sequelize.models;
 const app = express();
 
 app.use(express.static('public'));
 
-// Connect to the database
-const dbClient = new pg.Client(connectionString);
-dbClient.connect();
-dbClient.query('CREATE TABLE IF NOT EXISTS users(name VARCHAR(40), index VARCHAR(40) UNIQUE, access boolean)');
+// sync and seed the db
+models.user.belongsTo(models.permission, {foreignKey: 'id', targetKey: 'userId'});
+models.permission.hasMany(models.user);
+db.sequelize.sync({force: true}).then(() => {
+
+	models.user.create({
+		name: 'foo'
+	});
+
+	models.permission.bulkCreate([{
+		name: 'foo_index',
+		access: true,
+		userId: 1
+	},{
+		name: 'bar_index',
+		access: true,
+		userId: 1
+	},{
+		name: 'false_index',
+		access: false,
+		userId: 1
+	}]);
+});
+
 
 // Connect to elasticsearch
 var elasticsearchClient = new elasticsearch.Client({
-  host: 'localhost:9200',
-  log: 'trace'
+	host: 'localhost:9200',
+	log: 'trace'
 });
 
 app.get('/users/:userName', function(req, res) {
-	return dbClient.query('select index from users where name = $1::text and access = true', [req.params.userName], (err, userIndicies) => {
-		return res.json(userIndicies.rows);
-	});
+	return models.user.findOne({
+		where: {
+			name: req.params.userName
+		},
+		include: [{
+			model: models.permission
+		}]
+	}).then(user => {
+		console.log(user)
+		return res.json(user.permissions)
+	}).catch(err => {
+		console.log(err)
+	})
 });
 
 app.get('/search/:userName', function(req, res) {
