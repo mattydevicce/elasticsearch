@@ -17,4 +17,4 @@
 2.  start elasticsearch data store
 3.  start postgresql and create a database called `tribute`
 4.  run `node index.js`
-5.  open a browser and go to `http://localhost:3000`
+5.  open a browser and go to `http://localhost:3000` and search `fred`

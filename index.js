@@ -36,7 +36,7 @@ db.sequelize.sync({force: true}).then(() => {
 
 // Connect to elasticsearch
 var elasticsearchClient = new elasticsearch.Client({
-	host: 'localhost:9200',
+	host: config.es.host,
 	log: false
 });
 
