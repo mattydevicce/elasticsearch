@@ -54,9 +54,9 @@ const Permission = sequelize.define('permission', {
 	access: {
 		type: Sequelize.BOOLEAN
 	},
-	userId: {
-		type: Sequelize.INTEGER
-	}
+	// user_id: {
+	// 	type: Sequelize.INTEGER
+	// }
 });
 
 

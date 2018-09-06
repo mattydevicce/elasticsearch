@@ -10,27 +10,29 @@ const app = express();
 app.use(express.static('public'));
 
 // sync and seed the db
-models.user.belongsTo(models.permission, {foreignKey: 'id', targetKey: 'userId'});
-models.permission.hasMany(models.user);
+models.permission.belongsTo(models.user);
+models.user.hasMany(models.permission);
 db.sequelize.sync({force: true}).then(() => {
 
 	models.user.create({
 		name: 'foo'
+	}).then(user => {
+		console.log(user.id)
+		models.permission.bulkCreate([{
+			name: 'foo_index',
+			access: true,
+			userId: user.id
+		},{
+			name: 'bar_index',
+			access: true,
+			userId: user.id
+		},{
+			name: 'false_index',
+			access: false,
+			userId: user.id
+		}]);
+		
 	});
-
-	models.permission.bulkCreate([{
-		name: 'foo_index',
-		access: true,
-		userId: 1
-	},{
-		name: 'bar_index',
-		access: true,
-		userId: 1
-	},{
-		name: 'false_index',
-		access: false,
-		userId: 1
-	}]);
 });
 
 
@@ -41,7 +43,7 @@ var elasticsearchClient = new elasticsearch.Client({
 });
 
 app.get('/users/:userName', function(req, res) {
-	return models.user.findOne({
+	return models.user.find({
 		where: {
 			name: req.params.userName
 		},
@@ -49,25 +51,32 @@ app.get('/users/:userName', function(req, res) {
 			model: models.permission
 		}]
 	}).then(user => {
-		console.log(user)
-		return res.json(user.permissions)
+		return res.json(user);
 	}).catch(err => {
-		console.log(err)
-	})
+		console.log(err);
+	});
 });
 
 app.get('/search/:userName', function(req, res) {
 	// Checking for a blank search term
 	if (req.query.searchParam) {
-
-		return dbClient.query('select index from users where name = $1::text and access = true', [req.params.userName], (err, userIndicies) => {
-			if (userIndicies.rows.length > 0) {
-
+		models.user.find({
+			where: {
+				name: req.params.userName
+			},
+			include: [{
+				model: models.permission,
+				where: {
+					access: true
+				}
+			}]
+		}).then(user => {
+			if (user) {
 				// Not sure how we can search for more than one index so I will make a loop
 				const returnResults = [];
-				async.forEach(userIndicies.rows, (index, eachIndex) => {
+				async.forEach(user.permissions, (permission, eachPermission) => {
 					const response = elasticsearchClient.search({
-						index: index.index,
+						index: permission.name,
 						body: {
 							query: {
 								match: {
@@ -83,7 +92,7 @@ app.get('/search/:userName', function(req, res) {
 								"id": e._id
 							});
 						});
-						return eachIndex();
+						return eachPermission();
 					})
 				}, err => {
 					if (err) {
@@ -98,6 +107,21 @@ app.get('/search/:userName', function(req, res) {
 	} else {
 		return res.json();
 	};
+});
+
+app.post('/es/create', function(req, res) {
+ return elasticsearch.create({
+  index: req.body.index,
+  body: {
+   firstName: req.body.firstName,
+   lastName: req.body.lastMame,
+   location: req.body.location
+  }
+ }).then(body => {
+  return res.json(body);
+ }).catch(err => {
+  console.log(err);
+ });
 });
 
 

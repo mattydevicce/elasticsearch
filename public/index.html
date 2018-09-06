@@ -15,19 +15,48 @@
 			</div>
 		</div>
 	</nav>
-	<div class="container" style="width: 500px">
-		<h3>Welcome Foo!</h3>
+	<div class="container" style="width: 60%">
 		<h4 id="errors" style="text-align: center"></h4>
-		<input id="search-param" type="text">
-		<a id="search" class="waves-effect waves-light btn">search</a>
-		<br>
-		<div class="indicies">
-			<h4>Indicies
-			<ul class="indicies-ul collection">
-			</ul>
+		<div style="width: 50%; margin: 0 auto;">
+			<h3>Welcome Foo!</h3>
+			<label>Elastic Search</label>
+			<div class="row">
+				<input id="search-param" type="text" >
+			</div>
+			<a id="search" class="waves-effect waves-light btn">search</a>
 		</div>
-		<div id="results">
-			<h4>Results</h4>
+		<br>
+		<div class="row">
+			<div class="indicies col s6">
+				<h4>Indicies</h4>
+				<table>
+					<thead>
+						<tr>
+							<th>Index</th>
+							<th>Access</th>
+						</tr>
+					</thead>			
+
+					<tbody class="indicies-table">
+
+					</tbody>
+				</table>
+			</div>
+			<div id="results" class="col s6">
+				<h4>Results</h4>
+				<table>
+					<thead>
+						<tr>
+							<th>Full Name</th>
+							<th>Location</th>
+						</tr>
+					</thead>			
+
+					<tbody class="results-table">
+
+					</tbody>
+				</table>					
+			</div>
 		</div>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script type="text/javascript">
@@ -41,8 +70,8 @@
 				format: 'json'
 			},
 			success: function(response) {
-				response.forEach(function(e) {
-					$('.indicies-ul').append('<li class="collection-item">' + e.index + '</li>');
+				response.permissions.forEach(function(e) {
+					$('.indicies-table').append('<tr><td>' + e.name + '</td><td>' + e.access + '</td></tr>');
 				});
 			}, 
 			error: function() {
@@ -51,7 +80,7 @@
 		});
 
 		$("#search").on('click', function(e) {
-			$('#results').html('');
+			$(".no-data-found").remove();
 			$("#errors").remove();
 			$.ajax({
 				url: 'http://localhost:3000/search/foo',
@@ -64,10 +93,10 @@
 					if (response.length > 0) {
 						$("#results").append("<ul class='collection results-ul'></ul>");
 						response.forEach(e => {
-							$('.results-ul').append('<li class="collection-item">' + e.full_name + '<br>' + e.location + '</li>');
+							$('.results-table').append('<tr><td>' + e.full_name + '</td><td>' + e.location + '</td></tr>');
 						});
 					} else {
-						$("#results").append('<h4>No data found!</h4>');
+						$("#results").append('<h4 class="no-data-found">No data found!</h4>');
 					};
 				},
 				error: function() {
