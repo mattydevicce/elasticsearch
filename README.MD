@@ -1,5 +1,7 @@
 ### Welcome to a tribute to the greatest API in the world
 
+#####To see permissions in action, you can search name fred and see there is no fred durst which was seeded into elasticsearch with the index of false_index. fred flintstone was seeded as foo_index and fred rogers was seeded as bar_index.
+
 #### To run this app, one may need a couple of things...
 
 1.  A browser

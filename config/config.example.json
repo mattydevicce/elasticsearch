@@ -1,7 +1,12 @@
 {
-  "username": "jack blcK",
-  "password": null,
-  "database": "tribute",
-  "host": "127.0.0.1",
-  "dialect": "postgres"
+	"db": {
+		"username": "peterpan",
+		"password": null,
+		"database": "gatorademe",
+		"host": "127.0.0.1",
+		"dialect": "postgres"
+	},
+	"es": {
+		"host": "localhost:9200"
+	}
 }

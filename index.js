@@ -13,11 +13,9 @@ app.use(express.static('public'));
 models.permission.belongsTo(models.user);
 models.user.hasMany(models.permission);
 db.sequelize.sync({force: true}).then(() => {
-
 	models.user.create({
 		name: 'foo'
 	}).then(user => {
-		console.log(user.id)
 		models.permission.bulkCreate([{
 			name: 'foo_index',
 			access: true,
@@ -39,27 +37,37 @@ db.sequelize.sync({force: true}).then(() => {
 // Connect to elasticsearch
 var elasticsearchClient = new elasticsearch.Client({
 	host: 'localhost:9200',
-	log: 'trace'
+	log: false
 });
 
 // Seed elasticsearch
-elasticsearchClient.indicies.delete({
+elasticsearchClient.indices.delete({
 	index: 'foo_index',
 	ignore: [404]
 }).then(body => {
-	elasticsearchClient.indicies.delete({
+	return elasticsearchClient.indices.delete({
 		index: 'bar_index',
 		ignore: [404]
 	}).then(body => {
-		elasticsearchClient.indicies.delete({
+		return elasticsearchClient.indices.delete({
 			index: 'false_index',
 			ignore: [404]
 		}).then(body => {
-			elasticsearchClient.bulk({
+			return elasticsearchClient.bulk({
 				body: [
-					{}
+					{ delete: { _index: 'foo_index', _type: '_doc', _id: 1 } },
+					{ delete: { _index: 'bar_index', _type: '_doc', _id: 2 } },
+					{ delete: { _index: 'false_index', _type: '_doc', _id: 3 } },
+					{ index:  { _index: 'foo_index', _type: '_doc', _id: 1 } },
+					{ first_name: 'fred', last_name: 'flintstone', location: 'bedrock'},
+					{ index:  { _index: 'bar_index', _type: '_doc', _id: 1 } },
+					{ first_name: 'fred', last_name: 'rodgers', location: 'land of make-believe'},
+					{ index:  { _index: 'false_index', _type: '_doc', _id: 1 } },
+					{ first_name: 'fred', last_name: 'durst', location: 'I pack a chainsaw'},
 				]
-			})
+			}).then((a) => {
+				console.log("finished seeding")
+			}) 
 		});
 	});
 }).catch(err => {
@@ -83,6 +91,7 @@ app.get('/users/:userName', (req, res) => {
 
 app.get('/search/:userName', (req, res) => {
 	// Checking for a blank search term
+	console.log(req.query.searchParam)
 	if (req.query.searchParam) {
 		models.user.find({
 			where: {
@@ -109,6 +118,7 @@ app.get('/search/:userName', (req, res) => {
 							}
 						}
 					}).then(body => {
+						console.log(body)
 						body.hits.hits.forEach(e => {
 							returnResults.push({
 								"full_name": e._source.first_name + ' ' + e._source.last_name,
@@ -133,20 +143,22 @@ app.get('/search/:userName', (req, res) => {
 	};
 });
 
-app.post('/es/create', (req, res) => {
- return elasticsearch.create({
-  index: req.body.index,
-  body: {
-   firstName: req.body.firstName,
-   lastName: req.body.lastMame,
-   location: req.body.location
-  }
- }).then(body => {
-  return res.json(body);
- }).catch(err => {
-  console.log(err);
- });
-});
+
+// added if we want to work on it later
+// app.post('/es/create', (req, res) => {
+// 	return elasticsearch.create({
+// 		index: req.body.index,
+// 		body: {
+// 			first_name: req.body.firstName,
+// 			last_name: req.body.lastName,
+// 			location: req.body.location
+// 		}
+// 	}).then(body => {
+// 		return res.json(body);
+// 	}).catch(err => {
+// 		console.log(err);
+// 	});
+// });
 
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'))

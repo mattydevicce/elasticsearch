@@ -27,8 +27,8 @@
 		</div>
 		<br>
 		<div class="row">
-			<div class="indicies col s6">
-				<h4>Indicies</h4>
+			<div class="indices col s6">
+				<h4>Indices</h4>
 				<table>
 					<thead>
 						<tr>
@@ -37,7 +37,7 @@
 						</tr>
 					</thead>			
 
-					<tbody class="indicies-table">
+					<tbody class="indices-table">
 
 					</tbody>
 				</table>
@@ -71,7 +71,7 @@
 			},
 			success: function(response) {
 				response.permissions.forEach(function(e) {
-					$('.indicies-table').append('<tr><td>' + e.name + '</td><td>' + e.access + '</td></tr>');
+					$('.indices-table').append('<tr><td>' + e.name + '</td><td>' + e.access + '</td></tr>');
 				});
 			}, 
 			error: function() {
