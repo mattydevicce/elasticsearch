@@ -10,6 +10,7 @@
 
 #### To run this app, follow these steps
 
+1.  when in directory, create a config file like the example config, `cp config.example.json config.json` and fill in credentials
 1.  run this command install npm packages used for this project: `npm i`
 2.  start elasticsearch data store
 3.  start postgresql and create a database called `tribute`

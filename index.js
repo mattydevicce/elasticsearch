@@ -42,7 +42,31 @@ var elasticsearchClient = new elasticsearch.Client({
 	log: 'trace'
 });
 
-app.get('/users/:userName', function(req, res) {
+// Seed elasticsearch
+elasticsearchClient.indicies.delete({
+	index: 'foo_index',
+	ignore: [404]
+}).then(body => {
+	elasticsearchClient.indicies.delete({
+		index: 'bar_index',
+		ignore: [404]
+	}).then(body => {
+		elasticsearchClient.indicies.delete({
+			index: 'false_index',
+			ignore: [404]
+		}).then(body => {
+			elasticsearchClient.bulk({
+				body: [
+					{}
+				]
+			})
+		});
+	});
+}).catch(err => {
+	console.log(err);
+});
+
+app.get('/users/:userName', (req, res) => {
 	return models.user.find({
 		where: {
 			name: req.params.userName
@@ -57,7 +81,7 @@ app.get('/users/:userName', function(req, res) {
 	});
 });
 
-app.get('/search/:userName', function(req, res) {
+app.get('/search/:userName', (req, res) => {
 	// Checking for a blank search term
 	if (req.query.searchParam) {
 		models.user.find({
@@ -109,7 +133,7 @@ app.get('/search/:userName', function(req, res) {
 	};
 });
 
-app.post('/es/create', function(req, res) {
+app.post('/es/create', (req, res) => {
  return elasticsearch.create({
   index: req.body.index,
   body: {
